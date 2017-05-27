@@ -6,7 +6,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import nl.fontys.util.FontysTime;
 import nl.fontys.util.Money;
 
@@ -22,6 +25,9 @@ public class Bid {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @OneToOne (cascade = CascadeType.MERGE)
+    @PrimaryKeyJoinColumn
+    private Item item;
 
 
     public Bid(User buyer, Money amount) {
@@ -34,6 +40,14 @@ public class Bid {
         
     }
 
+    public Item getItem() {
+        return item;
+    }
+
+    public void setItem(Item item) {
+        this.item = item;
+    }
+    
     public FontysTime getTime() {
         return time;
     }

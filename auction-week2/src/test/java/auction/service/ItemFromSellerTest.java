@@ -6,7 +6,10 @@ import util.DatabaseCleaner;
 import auction.domain.Category;
 import auction.domain.Item;
 import auction.domain.User;
+import java.sql.SQLException;
 import java.util.Iterator;
+import nl.fontys.util.Money;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -18,6 +21,7 @@ public class ItemFromSellerTest {
     private AuctionMgr auctionMgr;
     private RegistrationMgr registrationMgr;
     private SellerMgr sellerMgr;
+    DatabaseCleaner clean;
 
     public ItemFromSellerTest() {
     }
@@ -27,10 +31,31 @@ public class ItemFromSellerTest {
         registrationMgr = new RegistrationMgr();
         auctionMgr = new AuctionMgr();
         sellerMgr = new SellerMgr();
-        DatabaseCleaner dc = new DatabaseCleaner();
-        dc.clean();
+        clean = new DatabaseCleaner();
     }
-
+    
+    @After
+    public void tearDown() {
+        try {
+            clean.clean();
+        } catch (SQLException ex) {
+            System.out.println(ex.toString());
+        }
+    }
+    
+    @Test
+    public void bidirectionalBidToItem(){
+        User seller = new User("seller@live.nl");
+        User buyer = new User("buyer@live.nl");
+        
+        Category catOne = new Category("catOne");
+        Item i = new Item(seller, catOne, "testItem");
+        
+        i.newBid(buyer, new Money(11, "eur"));
+        
+        assertEquals(11, i.getHighestBid());
+    }
+    
     /**
      *
      */
