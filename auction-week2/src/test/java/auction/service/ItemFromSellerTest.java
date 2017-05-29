@@ -43,19 +43,6 @@ public class ItemFromSellerTest {
         }
     }
     
-    @Test
-    public void bidirectionalBidToItem(){
-        User seller = new User("seller@live.nl");
-        User buyer = new User("buyer@live.nl");
-        
-        Category catOne = new Category("catOne");
-        Item i = new Item(seller, catOne, "testItem");
-        
-        i.newBid(buyer, new Money(11, "eur"));
-        
-        assertEquals(11, i.getHighestBid());
-    }
-    
     /**
      *
      */
