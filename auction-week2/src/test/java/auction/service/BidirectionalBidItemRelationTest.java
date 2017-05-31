@@ -46,14 +46,7 @@ public class BidirectionalBidItemRelationTest {
         auction = new AuctionMgr();
     }
     
-    @After
-    public void tearDown() {
-        try {
-            clean.clean();
-        } catch (SQLException ex) {
-            System.out.println(ex.toString());
-        }
-    }
+    
     
     @Test
     public void bidirectionalBidToItem(){
@@ -68,14 +61,14 @@ public class BidirectionalBidItemRelationTest {
         em.getTransaction().begin();
         Item i = new Item(seller, catOne, "testItem");
         
-        Bid b = new Bid(buyer, new Money(11, "eur"), i);
-        i.newBid(buyer, new Money(1, "euro"));
+        Bid b = new Bid(buyer, new Money(11, "euro"), i);
+        i.newBid(buyer, new Money(11, "euro"));
         em.persist(i);
         em.persist(b);
         em.getTransaction().commit();
         
         
-        assertEquals(b.getItem().getId(), i.getId());
+        assertEquals(b.getItem().getDescription(), i.getDescription());
         assertEquals(i.getHighestBid().getAmount().getCents(), b.getAmount().getCents());
     }
 }

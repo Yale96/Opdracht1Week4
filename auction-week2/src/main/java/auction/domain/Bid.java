@@ -37,7 +37,7 @@ public class Bid {
     public Bid(User buyer, Money amount, Item bettedItem) {
         this.buyer = buyer;
         this.amount = amount;
-        this.betttedItem = betttedItem;
+        this.betttedItem = bettedItem;
         time = FontysTime.now();
     }
     
