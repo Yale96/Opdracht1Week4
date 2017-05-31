@@ -25,14 +25,17 @@ import nl.fontys.util.Money;
     @NamedQuery(name = "Item.getAll", query = "select i from Item as i"),
     @NamedQuery(name = "Item.count", query = "select count(i) from Item as i"),
     @NamedQuery(name = "Item.findByDescription", query = "select i from Item as i where i.description = :description"),
-    @NamedQuery(name = "Item.findById", query = "select i from Item as i where i.id = :id") 
+    @NamedQuery(name = "Item.findById", query = "select i from Item as i where i.identifier = :identifier") 
 })
 public class Item implements Comparable {
     
     
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "IDENTIFIER", nullable = false, unique = true)
+    private Long identifier;
+
+    
     @ManyToOne (cascade = CascadeType.PERSIST)
     private User seller;
     
@@ -44,7 +47,8 @@ public class Item implements Comparable {
 
     private Category category;
     private String description;
-    @OneToOne(cascade=CascadeType.PERSIST)
+    
+    @OneToOne(cascade=CascadeType.PERSIST, mappedBy="betttedItem")
     private Bid highest;
     
     
@@ -61,7 +65,7 @@ public class Item implements Comparable {
     }
     
     public Long getId() {
-        return id;
+        return identifier;
     }
 
     public User getSeller() {
@@ -80,27 +84,21 @@ public class Item implements Comparable {
         return highest;
     }
     
-    public void setId(Long id){
-        this.id = id;
+    public void setId(Long identifier){
+        this.identifier = identifier;
     }
 
     public Bid newBid(User buyer, Money amount) {
         if (highest != null && highest.getAmount().compareTo(amount) >= 0) {
             return null;
         }
-        highest = new Bid(buyer, amount);
-        EntityManager em =Persistence.createEntityManagerFactory("nl.fhict.se42_auction_jar_1.0-SNAPSHOTPU").createEntityManager();
-        em.getTransaction().begin();
-        em.merge(highest);
-        em.merge(this);
-        em.getTransaction().commit();
+        highest = new Bid(buyer, amount, this);
         return highest;
-
     }
 
     @Override
     public int compareTo(Object arg0) {
-       return id.compareTo(((Item)arg0).id);
+       return identifier.compareTo(((Item)arg0).identifier);
     }
 
     @Override
@@ -112,7 +110,7 @@ public class Item implements Comparable {
             return false;
         }
         final Item other = (Item) o;
-        if (!Objects.equals(this.id, other.id)) {
+        if (!Objects.equals(this.identifier, other.identifier)) {
             return false;
         }
         if (!Objects.equals(this.seller, other.seller)) {

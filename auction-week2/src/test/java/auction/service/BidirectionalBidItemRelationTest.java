@@ -5,6 +5,7 @@
  */
 package auction.service;
 
+import auction.domain.Bid;
 import auction.domain.Category;
 import auction.domain.Item;
 import auction.domain.User;
@@ -33,10 +34,16 @@ public class BidirectionalBidItemRelationTest {
     final EntityManagerFactory emf = Persistence.createEntityManagerFactory("nl.fhict.se42_auction_jar_1.0-SNAPSHOTPU");
     final EntityManager em = emf.createEntityManager();
     DatabaseCleaner clean;
+    private SellerMgr seller;
+    private RegistrationMgr registration;
+    private AuctionMgr auction;
 
     @Before
     public void setUp() throws Exception {
         clean = new DatabaseCleaner();
+        seller = new SellerMgr();
+        registration = new RegistrationMgr();
+        auction = new AuctionMgr();
     }
     
     @After
@@ -53,11 +60,22 @@ public class BidirectionalBidItemRelationTest {
         User seller = new User("seller@live.nl");
         User buyer = new User("buyer@live.nl");
         
+        registration.registerUser(seller.getEmail());
+        registration.registerUser(buyer.getEmail());
+        
         Category catOne = new Category("catOne");
+        
+        em.getTransaction().begin();
         Item i = new Item(seller, catOne, "testItem");
         
-        i.newBid(buyer, new Money(11, "eur"));
+        Bid b = new Bid(buyer, new Money(11, "eur"), i);
+        i.newBid(buyer, new Money(1, "euro"));
+        em.persist(i);
+        em.persist(b);
+        em.getTransaction().commit();
         
-        assertEquals(11, i.getHighestBid().getAmount().getCents());
+        
+        assertEquals(b.getItem().getId(), i.getId());
+        assertEquals(i.getHighestBid().getAmount().getCents(), b.getAmount().getCents());
     }
 }

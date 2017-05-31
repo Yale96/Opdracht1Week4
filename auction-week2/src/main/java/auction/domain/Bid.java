@@ -1,6 +1,7 @@
 package auction.domain;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -16,23 +17,27 @@ import nl.fontys.util.Money;
 @Entity
 public class Bid {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "IDENTIFIER", nullable = false, unique = true)
+    private Long identifier;
+    
     @Embedded
     private FontysTime time;
     @ManyToOne(cascade=CascadeType.PERSIST)
     private User buyer;
     @Embedded
     private Money amount;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    
     @OneToOne (cascade = CascadeType.MERGE)
     @PrimaryKeyJoinColumn
-    private Item item;
+    private Item betttedItem;
 
 
-    public Bid(User buyer, Money amount) {
+    public Bid(User buyer, Money amount, Item bettedItem) {
         this.buyer = buyer;
         this.amount = amount;
+        this.betttedItem = betttedItem;
         time = FontysTime.now();
     }
     
@@ -41,11 +46,11 @@ public class Bid {
     }
 
     public Item getItem() {
-        return item;
+        return betttedItem;
     }
 
     public void setItem(Item item) {
-        this.item = item;
+        this.betttedItem = item;
     }
     
     public FontysTime getTime() {
@@ -61,10 +66,10 @@ public class Bid {
     }
     
     public long getId(){
-        return id;
+        return identifier;
     }
     
-    public void setId(Long id){
-        this.id = id;
+    public void setId(Long identifier){
+        this.identifier = identifier;
     }
 }
