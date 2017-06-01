@@ -27,10 +27,10 @@ import util.DatabaseCleaner;
  * @author Yannick
  */
 public class BidirectionalBidItemRelationTest {
-    
+
     public BidirectionalBidItemRelationTest() {
     }
-    
+
     final EntityManagerFactory emf = Persistence.createEntityManagerFactory("nl.fhict.se42_auction_jar_1.0-SNAPSHOTPU");
     final EntityManager em = emf.createEntityManager();
     DatabaseCleaner clean;
@@ -45,30 +45,52 @@ public class BidirectionalBidItemRelationTest {
         registration = new RegistrationMgr();
         auction = new AuctionMgr();
     }
-    
-    
-    
+
     @Test
-    public void bidirectionalBidToItem(){
+    public void bidirectionalBidToItem() {
         User seller = new User("seller@live.nl");
         User buyer = new User("buyer@live.nl");
-        
+
         registration.registerUser(seller.getEmail());
         registration.registerUser(buyer.getEmail());
-        
+
         Category catOne = new Category("catOne");
-        
+
         em.getTransaction().begin();
         Item i = new Item(seller, catOne, "testItem");
-        
+
         Bid b = new Bid(buyer, new Money(11, "euro"), i);
-        i.newBid(buyer, new Money(11, "euro"));
+        i.newBid(buyer, b.getAmount());
         em.persist(i);
         em.persist(b);
         em.getTransaction().commit();
-        
-        
+
+        assertNotNull(i.getId());
+        assertNotNull(b.getId());
         assertEquals(b.getItem().getDescription(), i.getDescription());
         assertEquals(i.getHighestBid().getAmount().getCents(), b.getAmount().getCents());
+    }
+
+    @Test
+    public void biderctionalBidToItemNullPointer() {
+        try {
+            User seller = new User("seller@live.nl");
+            User buyer = new User("buyer@live.nl");
+
+            registration.registerUser(seller.getEmail());
+            registration.registerUser(buyer.getEmail());
+
+            Category catOne = new Category("catOne");
+
+            
+            Item i = new Item(seller, catOne, "testItem");
+
+            Bid b = new Bid(buyer, new Money(11, "euro"), i);
+            i.newBid(buyer, b.getAmount());
+            b.getId();
+            
+        } catch (NullPointerException ex) {
+            System.out.println(ex.toString());
+        }
     }
 }
