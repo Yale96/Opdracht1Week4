@@ -77,6 +77,7 @@ public class User {
     public void addItem(Item item)
     {
         offeredItems.add(item);
+        item.setSeller(this);
     }
     
     public int numberOfOfferdItems()

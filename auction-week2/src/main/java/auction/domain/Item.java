@@ -8,6 +8,7 @@ import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -29,7 +30,6 @@ import nl.fontys.util.Money;
 })
 public class Item implements Comparable {
     
-    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "IDENTIFIER", nullable = false, unique = true)
@@ -38,6 +38,10 @@ public class Item implements Comparable {
     
     @ManyToOne (cascade = CascadeType.PERSIST)
     private User seller;
+
+    public void setSeller(User seller) {
+        this.seller = seller;
+    }
     
     
    @Embedded

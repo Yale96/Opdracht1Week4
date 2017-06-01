@@ -20,8 +20,8 @@ public class SellerMgr {
     public Item offerItem(User seller, Category cat, String description) {
         // TODO 
         Item toReturn = new Item(seller, cat, description);
-        seller.addItem(toReturn);
         itemDAO.create(toReturn);
+        seller.addItem(toReturn);
         return toReturn;
     }
     

@@ -49,14 +49,10 @@ public class AuctionMgr {
      * amount niet hoger was dan het laatste bod, dan null
      */
     public Bid newBid(Item item, User buyer, Money amount) {
-    if (item.getHighestBid() == null) {
-            item.newBid(buyer, amount);
-            return item.getHighestBid();
-        }
-        else if (item.getHighestBid().getAmount().getCents() < amount.getCents()) {
-            item.newBid(buyer, amount);
-            return item.getHighestBid();
-        }
-        return null;
-    }  
+        Bid makeNewBid = item.newBid(buyer, amount);
+
+        itemDAO.edit(item);
+
+        return makeNewBid;
+    }
 }

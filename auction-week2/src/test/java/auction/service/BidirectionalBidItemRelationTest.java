@@ -5,6 +5,7 @@
  */
 package auction.service;
 
+import auction.dao.ItemDAOJPAImpl;
 import auction.domain.Bid;
 import auction.domain.Category;
 import auction.domain.Item;
@@ -37,6 +38,7 @@ public class BidirectionalBidItemRelationTest {
     private SellerMgr seller;
     private RegistrationMgr registration;
     private AuctionMgr auction;
+    private ItemDAOJPAImpl idao;
 
     @Before
     public void setUp() throws Exception {
@@ -44,53 +46,27 @@ public class BidirectionalBidItemRelationTest {
         seller = new SellerMgr();
         registration = new RegistrationMgr();
         auction = new AuctionMgr();
+        idao = new ItemDAOJPAImpl(em);
     }
 
     @Test
     public void bidirectionalBidToItem() {
-        User seller = new User("seller@live.nl");
-        User buyer = new User("buyer@live.nl");
 
-        registration.registerUser(seller.getEmail());
-        registration.registerUser(buyer.getEmail());
+        Category category = new Category("cat");
+        User user = registration.registerUser("test@test.nl");
+        Item item = seller.offerItem(user, category, "test");
 
-        Category catOne = new Category("catOne");
-
-        em.getTransaction().begin();
-        Item i = new Item(seller, catOne, "testItem");
-
-        Bid b = new Bid(buyer, new Money(11, "euro"), i);
-        i.newBid(buyer, b.getAmount());
-        em.persist(i);
-        em.persist(b);
-        em.getTransaction().commit();
-
-        assertNotNull(i.getId());
-        assertNotNull(b.getId());
-        assertEquals(b.getItem().getDescription(), i.getDescription());
-        assertEquals(i.getHighestBid().getAmount().getCents(), b.getAmount().getCents());
-    }
-
-    @Test
-    public void biderctionalBidToItemNullPointer() {
-        try {
-            User seller = new User("seller@live.nl");
-            User buyer = new User("buyer@live.nl");
-
-            registration.registerUser(seller.getEmail());
-            registration.registerUser(buyer.getEmail());
-
-            Category catOne = new Category("catOne");
-
-            
-            Item i = new Item(seller, catOne, "testItem");
-
-            Bid b = new Bid(buyer, new Money(11, "euro"), i);
-            i.newBid(buyer, b.getAmount());
-            b.getId();
-            
-        } catch (NullPointerException ex) {
-            System.out.println(ex.toString());
-        }
+        assertEquals(1, user.numberOfOfferdItems());
+        assertNull(item.getHighestBid());
+        
+        Bid b = auction.newBid(item, user, new Money(50, "Euro"));
+        assertNotNull(item.getHighestBid());
+        assertSame(item, b.getItem());
+        assertEquals(user, b.getBuyer());
+        assertEquals(b.getAmount(), new Money(50, "Euro"));
+        
+        Bid secondBid = auction.newBid(item, user, new Money(100, "Euro"));
+        assertNotNull(secondBid);
+        assertEquals(item.getHighestBid().getAmount(), new Money(100, "Euro"));
     }
 }
